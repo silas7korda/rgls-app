@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>RLGS Enterprise - Access Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ios-blue: #007AFF;
+        --bg-app: #0A0A0B;
+        --bg-card: #151517;
+        --bg-glass: rgba(255, 255, 255, 0.03);
+        --text-primary: #ffffff;
+        --text-secondary: rgba(255, 255, 255, 0.6);
+        --text-tertiary: rgba(255, 255, 255, 0.35);
+        --border-color: rgba(255, 255, 255, 0.06);
+        --border-glass: rgba(255, 255, 255, 0.1);
+      }
+      
+      .theme-light {
+        --bg-app: #F5F5F7;
+        --bg-card: #ffffff;
+        --bg-glass: rgba(0, 0, 0, 0.02);
+        --text-primary: #1D1D1F;
+        --text-secondary: #86868B;
+        --text-tertiary: #AEAEB2;
+        --border-color: rgba(0, 0, 0, 0.05);
+        --border-glass: rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        background-color: var(--bg-app);
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        transition: background-color 0.4s ease;
+      }
+      
+      .iphone-frame {
+        width: 393px;
+        height: 852px;
+        background-color: var(--bg-app);
+        position: relative;
+        overflow: hidden;
+        border: 12px solid #1C1C1E;
+        border-radius: 50px;
+        box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+        display: flex;
+        flex-direction: column;
+        transition: background-color 0.4s ease;
+      }
+
+      @media (max-width: 450px) or (max-height: 860px) {
+        .iphone-frame {
+          width: 100vw;
+          height: 100vh;
+          border: none;
+          border-radius: 0;
+        }
+      }
+
+      .vibrant-glass {
+        background: var(--bg-glass);
+        backdrop-filter: blur(25px) saturate(180%);
+        -webkit-backdrop-filter: blur(25px) saturate(180%);
+      }
+      
+      .ios-active:active {
+        transform: scale(0.94);
+        transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1);
+      }
+      
+      #root {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      ::-webkit-scrollbar { display: none; }
+
+      /* Utility classes using CSS variables */
+      .app-bg { background-color: var(--bg-app); }
+      .card-bg { background-color: var(--bg-card); }
+      .text-primary { color: var(--text-primary); }
+      .text-secondary { color: var(--text-secondary); }
+      .text-tertiary { color: var(--text-tertiary); }
+      .border-main { border-color: var(--border-color); }
+
+      @media print {
+        body {
+          background-color: white !important;
+          height: auto !important;
+          overflow: visible !important;
+        }
+        .iphone-frame {
+          width: 100% !important;
+          height: auto !important;
+          border: none !important;
+          box-shadow: none !important;
+          border-radius: 0 !important;
+          overflow: visible !important;
+          position: static !important;
+        }
+        #root > div:not(#printable-area) {
+          display: none !important;
+        }
+        #printable-area {
+          display: block !important;
+          visibility: visible !important;
+        }
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div class="iphone-frame">
+        <div id="root"></div>
+    </div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

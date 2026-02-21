@@ -1,0 +1,7 @@
+{
+  "name": "RLGS Data Management System",
+  "description": "A comprehensive data management dashboard with record tracking, automated calculations (0.2 tax/fee), import/export capabilities, and multi-step entry forms.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
