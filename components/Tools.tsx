@@ -1,16 +1,25 @@
 
 import React, { useState, useCallback } from 'react';
-
-import ExportData from './ExportData';
+import { 
+  Calculator, 
+  Coins, 
+  Brain, 
+  PieChart, 
+  FileDown, 
+  ChevronLeft,
+  Toolbox,
+  Delete
+} from 'lucide-react';
 import { DataRecord } from '../types';
 
-type ActiveTool = 'none' | 'calculator' | 'converter' | 'ai' | 'upgrade_prompt' | 'print' | 'export';
+type ActiveTool = 'none' | 'calculator' | 'converter' | 'ai' | 'upgrade_prompt' | 'export';
 
 interface ToolsProps {
   records: DataRecord[];
+  onExport: () => void;
 }
 
-const Tools: React.FC<ToolsProps> = ({ records }) => {
+const Tools: React.FC<ToolsProps> = ({ onExport }) => {
   const [activeTool, setActiveTool] = useState<ActiveTool>('none');
 
   const haptic = useCallback((type: 'light' | 'medium' = 'light') => {
@@ -34,88 +43,73 @@ const Tools: React.FC<ToolsProps> = ({ records }) => {
   }
 
   if (activeTool === 'converter') {
-    return <SimplePlaceholder toolName="Currency Converter" icon="fa-coins" onClose={closeTool} />;
+    return <SimplePlaceholder toolName="Currency Converter" icon={Coins} onClose={closeTool} />;
   }
 
   if (activeTool === 'ai') {
-    return <SimplePlaceholder toolName="AI Business Analyst" icon="fa-brain" onClose={closeTool} />;
-  }
-
-  if (activeTool === 'export') {
-    return (
-      <div className="animate-in fade-in slide-in-from-right-4 duration-500 max-w-md mx-auto">
-        <button onClick={closeTool} className="mb-6 text-gray-500 hover:text-white flex items-center gap-2">
-          <i className="fa-solid fa-chevron-left text-[10px]"></i>
-          <span className="text-[10px] font-semibold uppercase tracking-widest">Back to Suite</span>
-        </button>
-        <ExportData records={records} />
-      </div>
-    );
+    return <SimplePlaceholder toolName="AI Business Analyst" icon={Brain} onClose={closeTool} />;
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-16 max-w-md mx-auto">
+    <div className="space-y-8 pb-16 max-w-md mx-auto">
       <div className="flex flex-col items-center gap-2 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-[#007AFF]/5 flex items-center justify-center border border-[#007AFF]/10">
-          <i className="fa-solid fa-toolbox text-[#007AFF] text-base"></i>
+        <div 
+          className="w-12 h-12 rounded-2xl bg-[#007AFF]/5 flex items-center justify-center border border-[#007AFF]/10"
+        >
+          <Toolbox className="w-6 h-6 text-[#007AFF]" />
         </div>
         <h3 className="font-bold tracking-[0.2em] uppercase text-[10px] text-tertiary">Business Suite</h3>
       </div>
 
       <div className="grid grid-cols-2 gap-3 px-1">
         <ToolButton 
-          icon="fa-calculator" 
+          icon={Calculator} 
           label="Calculator" 
           desc="Verify Margins" 
           color="bg-[#007AFF]" 
           onClick={() => openTool('calculator')} 
         />
         <ToolButton 
-          icon="fa-coins" 
+          icon={Coins} 
           label="Converter" 
           desc="GHC to USD" 
           color="bg-emerald-500" 
           onClick={() => openTool('converter')} 
         />
         <ToolButton 
-          icon="fa-brain" 
+          icon={Brain} 
           label="AI Tools" 
           desc="Growth Logic" 
           color="bg-indigo-500" 
           onClick={() => openTool('ai')} 
         />
         <ToolButton 
-          icon="fa-chart-pie" 
+          icon={PieChart} 
           label="Insights" 
           desc="Market Drift" 
           color="bg-amber-500" 
           onClick={() => openTool('upgrade_prompt')}
         />
         <ToolButton 
-          icon="fa-file-export" 
+          icon={FileDown} 
           label="Export Data" 
           desc="Excel & CSV" 
           color="bg-slate-600" 
-          onClick={() => openTool('export')} 
-        />
-        <ToolButton 
-          icon="fa-print" 
-          label="Print Report" 
-          desc="Quick View" 
-          color="bg-zinc-700" 
-          onClick={() => window.print()}
+          onClick={onExport} 
         />
       </div>
 
-      <div className="px-2 pt-4">
-        <div className="bg-white/[0.02] border border-main p-5 rounded-2xl space-y-3">
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-tertiary">Status</p>
+      <div 
+        className="px-2 pt-4"
+      >
+        <div className="bg-white/[0.02] border border-main p-5 rounded-3xl space-y-3">
+          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-tertiary">System Status</p>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-[11px] font-medium text-secondary tracking-tight">Financial Engine Online</span>
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span className="text-[11px] font-bold text-secondary tracking-tight">Financial Engine Online</span>
             </div>
-            <span className="text-[9px] font-bold text-tertiary">v2.5.0</span>
+            <span className="text-[9px] font-bold text-tertiary">v3.0.0</span>
           </div>
         </div>
       </div>
@@ -124,23 +118,23 @@ const Tools: React.FC<ToolsProps> = ({ records }) => {
 };
 
 interface ToolButtonProps {
-  icon: string;
+  icon: any;
   label: string;
   desc: string;
   color: string;
   onClick: () => void;
 }
 
-const ToolButton: React.FC<ToolButtonProps> = ({ icon, label, desc, color, onClick }) => (
+const ToolButton: React.FC<ToolButtonProps> = ({ icon: Icon, label, desc, color, onClick }) => (
   <button 
     onClick={onClick}
-    className="flex flex-col items-start p-5 rounded-2xl border border-main bg-card hover:bg-white/[0.02] active:scale-95 transition-all duration-300 relative overflow-hidden group"
+    className="flex flex-col items-start p-5 rounded-3xl border border-main bg-card transition-all duration-300 relative overflow-hidden group"
   >
-    <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-5 text-white ${color} shadow-sm transition-transform group-hover:scale-110`}>
-      <i className={`fa-solid ${icon} text-xs`}></i>
+    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-5 text-white ${color} shadow-lg shadow-black/20 transition-transform group-hover:scale-110`}>
+      <Icon className="w-5 h-5" />
     </div>
     <span className="text-sm font-bold text-primary mb-0.5 tracking-tight">{label}</span>
-    <span className="text-[9px] font-medium text-tertiary uppercase tracking-wider">{desc}</span>
+    <span className="text-[9px] font-bold text-tertiary uppercase tracking-wider">{desc}</span>
   </button>
 );
 
@@ -163,8 +157,6 @@ const ModernCalculator: React.FC<ModernCalculatorProps> = ({ onClose, haptic }) 
     haptic('medium');
     try {
       const sanitized = display.replace('×', '*').replace('÷', '/');
-      // Simple safe evaluation for basic arithmetic
-      // eslint-disable-next-line no-new-func
       const result = new Function(`return ${sanitized}`)();
       setEquation(display + ' =');
       setDisplay(String(Number(result.toFixed(6))));
@@ -180,19 +172,21 @@ const ModernCalculator: React.FC<ModernCalculatorProps> = ({ onClose, haptic }) 
   ];
 
   return (
-    <div className="animate-in fade-in slide-in-from-right-4 duration-500 max-w-md mx-auto h-[75vh] flex flex-col bg-[#0c0c0e] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl">
+    <div 
+      className="max-w-md mx-auto h-[75vh] flex flex-col bg-[#0c0c0e] rounded-[48px] border border-white/5 overflow-hidden shadow-2xl"
+    >
       <div className="p-6 border-b border-white/[0.03] flex justify-between items-center bg-white/[0.01]">
-        <button onClick={onClose} className="text-gray-500 hover:text-white flex items-center gap-2">
-          <i className="fa-solid fa-chevron-left text-[10px]"></i>
-          <span className="text-[10px] font-semibold uppercase tracking-widest">Back</span>
+        <button onClick={onClose} className="text-gray-500 hover:text-white flex items-center gap-2 transition-colors">
+          <ChevronLeft className="w-4 h-4" />
+          <span className="text-[10px] font-bold uppercase tracking-widest">Back</span>
         </button>
-        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-500">Calculator</span>
-        <i className="fa-solid fa-calculator text-[10px] text-gray-700"></i>
+        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500">Calculator</span>
+        <Calculator className="w-4 h-4 text-gray-700" />
       </div>
 
       <div className="flex-1 flex flex-col justify-end p-8 text-right bg-gradient-to-b from-transparent to-black/20">
-        <div className="h-6 text-[11px] font-medium text-gray-700 tracking-wider mb-2 uppercase">{equation}</div>
-        <div className="text-6xl font-semibold tracking-tighter text-white tabular-nums leading-none truncate">{display}</div>
+        <div className="h-6 text-[11px] font-bold text-gray-700 tracking-wider mb-2 uppercase">{equation}</div>
+        <div className="text-6xl font-bold tracking-tighter text-white tabular-nums leading-none truncate">{display}</div>
       </div>
 
       <div className="p-4 grid grid-cols-4 gap-2 bg-black/40">
@@ -205,14 +199,14 @@ const ModernCalculator: React.FC<ModernCalculatorProps> = ({ onClose, haptic }) 
               else if (btn.label === 'DEL') { haptic('light'); setDisplay(display.length > 1 ? display.slice(0, -1) : '0'); }
               else handleInput(btn.label);
             }}
-            className={`h-16 rounded-[24px] font-semibold text-lg transition-all active:scale-90 flex items-center justify-center border ${
+            className={`h-16 rounded-[24px] font-bold text-lg transition-all flex items-center justify-center border ${
               btn.type === 'operator' ? 'bg-blue-600/10 text-blue-500 border-blue-500/10' :
               btn.type === 'equals' ? 'bg-blue-600 text-white border-blue-400/20' :
               btn.type === 'action' ? 'bg-red-500/5 text-red-500 border-red-500/10' :
               'bg-white/[0.03] text-white border-white/[0.03]'
             }`}
           >
-            {btn.label === 'DEL' ? <i className="fa-solid fa-delete-left text-sm"></i> : btn.label}
+            {btn.label === 'DEL' ? <Delete className="w-5 h-5" /> : btn.label}
           </button>
         ))}
       </div>
@@ -222,19 +216,21 @@ const ModernCalculator: React.FC<ModernCalculatorProps> = ({ onClose, haptic }) 
 
 interface SimplePlaceholderProps {
   toolName: string;
-  icon: string;
+  icon: any;
   onClose: () => void;
   upgradeRequired?: boolean;
 }
 
-const SimplePlaceholder: React.FC<SimplePlaceholderProps> = ({ toolName, icon, onClose, upgradeRequired = false }) => (
-  <div className="animate-in fade-in slide-in-from-right-4 duration-500 max-w-md mx-auto h-[60vh] flex flex-col items-center justify-center bg-[#0c0c0e] rounded-[40px] border border-white/5 p-12 text-center space-y-6">
-    <div className={`w-20 h-20 rounded-[32px] bg-white/[0.03] border border-white/10 flex items-center justify-center text-3xl ${upgradeRequired ? 'text-amber-500' : 'text-gray-500'}`}>
-      <i className={`fa-solid ${icon}`}></i>
+const SimplePlaceholder: React.FC<SimplePlaceholderProps> = ({ toolName, icon: Icon, onClose, upgradeRequired = false }) => (
+  <div 
+    className="max-w-md mx-auto h-[60vh] flex flex-col items-center justify-center bg-[#0c0c0e] rounded-[48px] border border-white/5 p-12 text-center space-y-6"
+  >
+    <div className={`w-24 h-24 rounded-[32px] bg-white/[0.03] border border-white/10 flex items-center justify-center text-3xl ${upgradeRequired ? 'text-amber-500' : 'text-gray-500'}`}>
+      <Icon className="w-10 h-10" />
     </div>
     <div>
-      <h3 className="text-xl font-semibold text-white mb-2 tracking-tight">{toolName}</h3>
-      <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-widest leading-relaxed">
+      <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">{toolName}</h3>
+      <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
         {upgradeRequired 
           ? "Module is currently restricted. Upgrade to Enterprise Platinum for full access to Market Drift analytics." 
           : "Module is currently restricted. Upgrade to Enterprise Platinum for full access."}
@@ -242,7 +238,7 @@ const SimplePlaceholder: React.FC<SimplePlaceholderProps> = ({ toolName, icon, o
     </div>
     <button 
       onClick={onClose}
-      className="px-10 py-4 bg-white/5 border border-white/10 rounded-full text-[10px] font-semibold uppercase tracking-[0.3em] ios-active"
+      className="px-10 py-5 bg-white/5 border border-white/10 rounded-full text-[11px] font-bold uppercase tracking-[0.3em] text-white"
     >
       Return to Suite
     </button>

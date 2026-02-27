@@ -1,5 +1,14 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { 
+  Search, 
+  X, 
+  Calendar, 
+  Trash2, 
+  Edit3, 
+  FolderOpen,
+  Loader2
+} from 'lucide-react';
 import { DataRecord } from '../types';
 
 interface DataRecordsProps {
@@ -14,16 +23,12 @@ const DataRecords: React.FC<DataRecordsProps> = ({ records, onDelete, onEdit, cu
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
-  useEffect(() => {
-    if (searchTerm !== '') {
-      const timer = setTimeout(() => setIsSearching(false), 300);
-      return () => clearTimeout(timer);
+  const handleSearch = (val: string) => {
+    setSearchTerm(val);
+    if (val !== '') {
+      setIsSearching(true);
+      setTimeout(() => setIsSearching(false), 500);
     }
-  }, [searchTerm]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setIsSearching(e.target.value !== '');
   };
 
   const filtered = useMemo(() => {
@@ -42,96 +47,83 @@ const DataRecords: React.FC<DataRecordsProps> = ({ records, onDelete, onEdit, cu
     return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear().toString().slice(-2)}`;
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="flex gap-2">
-        <div className="relative flex-1 group">
-          <i className={`fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${searchTerm ? 'text-[#007AFF]' : 'text-tertiary'}`}></i>
-          <input 
-            type="text" 
-            placeholder="Search entries..." 
-            className="w-full bg-glass border border-main rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:outline-none focus:border-[#007AFF]/40 focus:bg-glass text-primary transition-all placeholder:text-tertiary"
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-          {searchTerm && (
-            <button 
-              onClick={() => setSearchTerm('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-glass flex items-center justify-center text-[10px]"
-            >
-              <i className="fa-solid fa-xmark"></i>
-            </button>
+    <div className="space-y-6 pb-24">
+      <div className="relative group">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300">
+          {isSearching ? (
+            <Loader2 className="w-5 h-5 text-[#007AFF] animate-spin" />
+          ) : (
+            <Search className={`w-5 h-5 ${searchTerm ? 'text-[#007AFF]' : 'text-tertiary'}`} />
           )}
         </div>
-        <button 
-          onClick={handlePrint}
-          className="w-12 h-12 bg-glass border border-main rounded-2xl flex items-center justify-center text-secondary hover:text-[#007AFF] hover:border-[#007AFF]/30 transition-all active:scale-90"
-          title="Print Records"
-        >
-          <i className="fa-solid fa-print text-base"></i>
-        </button>
+        <input 
+          type="text" 
+          placeholder="Search entries..." 
+          className="w-full bg-glass border border-main rounded-3xl py-4 pl-12 pr-12 text-sm focus:outline-none focus:border-[#007AFF]/40 focus:bg-white/[0.02] text-primary transition-all placeholder:text-tertiary font-medium"
+          value={searchTerm}
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+        {searchTerm && (
+          <button 
+            onClick={() => { setSearchTerm(''); setIsSearching(false); }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-2xl bg-glass border border-main flex items-center justify-center text-secondary hover:text-rose-500 transition-all active:scale-90"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
-      <div className="space-y-3">
-        {isSearching ? (
-          [1, 2, 3].map(i => (
-            <div key={i} className="card-bg rounded-2xl border border-main p-6 animate-pulse">
-              <div className="flex justify-between mb-6">
-                <div className="h-3 w-20 bg-glass rounded"></div>
-                <div className="h-6 w-12 bg-glass rounded-lg"></div>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="h-8 w-full bg-glass rounded-lg"></div>
-                <div className="h-8 w-full bg-glass rounded-lg"></div>
-              </div>
-            </div>
-          ))
-        ) : filtered.length > 0 ? (
+      <div className="space-y-4">
+        {filtered.length > 0 ? (
           filtered.map((record) => (
-            <div key={record.id} className="relative card-bg rounded-2xl border border-main overflow-hidden shadow-sm transition-all active:scale-[0.99] duration-300">
-              <div className="p-4 border-b border-main flex justify-between items-center bg-glass/50">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#007AFF]"></div>
-                  <span className="text-[10px] font-bold tracking-wider text-tertiary uppercase">
-                    {formatDate(record.date)}
-                  </span>
+            <div 
+              key={record.id} 
+              className="relative card-bg rounded-[32px] border border-main overflow-hidden shadow-sm hover:border-[#007AFF]/20 transition-all"
+            >
+              <div className="p-5 border-b border-main flex justify-between items-center bg-white/[0.01]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-[#007AFF]/5 flex items-center justify-center text-[#007AFF]">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold tracking-[0.2em] text-tertiary uppercase">
+                      {formatDate(record.date)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex gap-1.5">
+                <div className="flex gap-2">
                    <button 
                     onClick={() => onDelete(record)}
-                    className="w-8 h-8 flex items-center justify-center rounded-xl bg-rose-500/5 text-rose-500/30 hover:text-rose-500 transition-all"
+                    className="w-10 h-10 flex items-center justify-center rounded-2xl bg-rose-500/5 text-rose-500/30 hover:text-rose-500 transition-all"
                   >
-                    <i className="fa-solid fa-trash-can text-[10px]"></i>
+                    <Trash2 className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => onEdit(record)}
-                    className="h-8 px-3 rounded-xl bg-[#007AFF]/5 text-[#007AFF] font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 hover:bg-[#007AFF]/10 transition-all"
+                    className="h-10 px-4 rounded-2xl bg-[#007AFF]/5 text-[#007AFF] font-bold text-[10px] uppercase tracking-wider flex items-center gap-2 hover:bg-[#007AFF]/10 transition-all"
                   >
-                    <i className="fa-solid fa-pen-to-square text-[9px]"></i> Edit
+                    <Edit3 className="w-3.5 h-3.5" /> Edit
                   </button>
                 </div>
               </div>
 
-              <div className="p-5 grid grid-cols-2 gap-y-6">
-                <div className="space-y-0.5">
-                  <p className="text-[9px] text-tertiary uppercase font-bold tracking-wider">Gross Sales</p>
-                  <p className="text-xl font-bold text-primary tabular-nums">{getCurrencySymbol()}{record.store.toLocaleString()}</p>
+              <div className="p-6 grid grid-cols-2 gap-y-8">
+                <div className="space-y-1">
+                  <p className="text-[10px] text-tertiary uppercase font-bold tracking-[0.15em]">Gross Sales</p>
+                  <p className="text-2xl font-black text-primary tabular-nums tracking-tighter">{getCurrencySymbol()}{record.store.toLocaleString()}</p>
                 </div>
-                <div className="space-y-0.5 text-right">
-                  <p className="text-[9px] text-tertiary uppercase font-bold tracking-wider">Savings</p>
-                  <p className="text-xl font-bold text-emerald-500 tabular-nums">{getCurrencySymbol()}{record.savings.toLocaleString()}</p>
+                <div className="space-y-1 text-right">
+                  <p className="text-[10px] text-tertiary uppercase font-bold tracking-[0.15em]">Savings</p>
+                  <p className="text-2xl font-black text-emerald-500 tabular-nums tracking-tighter">{getCurrencySymbol()}{record.savings.toLocaleString()}</p>
                 </div>
-                <div className="space-y-0.5">
-                  <p className="text-[9px] text-tertiary uppercase font-bold tracking-wider">Machine</p>
-                  <p className="text-base font-medium text-secondary tabular-nums">{getCurrencySymbol()}{record.machine.toLocaleString()}</p>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-tertiary uppercase font-bold tracking-[0.15em]">Machine</p>
+                  <p className="text-lg font-bold text-secondary tabular-nums tracking-tight">{getCurrencySymbol()}{record.machine.toLocaleString()}</p>
                 </div>
-                <div className="space-y-0.5 text-right">
-                  <p className="text-[9px] text-tertiary uppercase font-bold tracking-wider">Expenses</p>
-                  <p className={`text-base font-medium tabular-nums ${record.expenses ? 'text-rose-400' : 'opacity-20'}`}>
+                <div className="space-y-1 text-right">
+                  <p className="text-[10px] text-tertiary uppercase font-bold tracking-[0.15em]">Expenses</p>
+                  <p className={`text-lg font-bold tabular-nums tracking-tight ${record.expenses ? 'text-rose-400' : 'opacity-20'}`}>
                     {record.expenses ? `${getCurrencySymbol()}${record.expenses.toLocaleString()}` : '0.00'}
                   </p>
                 </div>
@@ -139,11 +131,14 @@ const DataRecords: React.FC<DataRecordsProps> = ({ records, onDelete, onEdit, cu
             </div>
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center py-24 opacity-20 animate-in fade-in duration-700">
-            <div className="w-16 h-16 bg-glass rounded-full flex items-center justify-center mb-4">
-              <i className="fa-solid fa-folder-open text-2xl"></i>
+          <div 
+            className="flex flex-col items-center justify-center py-24 text-center"
+          >
+            <div className="w-20 h-20 bg-glass rounded-[32px] flex items-center justify-center mb-6 text-tertiary/20">
+              <FolderOpen className="w-10 h-10" />
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em]">No records found</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-tertiary">No records found</p>
+            <p className="text-[10px] text-tertiary/50 mt-2">Try adjusting your search parameters</p>
           </div>
         )}
       </div>

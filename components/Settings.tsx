@@ -1,6 +1,19 @@
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { 
+  DollarSign, 
+  Calendar, 
+  Globe, 
+  Key, 
+  CloudUpload, 
+  Trash2, 
+  LogOut, 
+  ChevronDown,
+  ChevronRight,
+  Loader2
+} from 'lucide-react';
 
 interface SettingsProps {
   onClearHistory: () => void;
@@ -9,8 +22,7 @@ interface SettingsProps {
   setCurrency: (c: string) => void;
   dateFormat: string;
   setDateFormat: (d: string) => void;
-  theme: 'dark' | 'light';
-  setTheme: (t: 'dark' | 'light') => void;
+  onUpdatePreference: (key: string, value: any) => void;
 }
 
 const Settings: React.FC<SettingsProps> = ({ 
@@ -20,8 +32,7 @@ const Settings: React.FC<SettingsProps> = ({
   setCurrency, 
   dateFormat, 
   setDateFormat,
-  theme,
-  setTheme
+  onUpdatePreference
 }) => {
   const [language, setLanguage] = useState('English');
   const [isBackingUp, setIsBackingUp] = useState(false);
@@ -40,12 +51,16 @@ const Settings: React.FC<SettingsProps> = ({
   };
 
   const toggleCurrency = () => {
-    setCurrency(currency === 'GHC (₵)' ? 'USD ($)' : 'GHC (₵)');
+    const newVal = currency === 'GHC (₵)' ? 'USD ($)' : 'GHC (₵)';
+    setCurrency(newVal);
+    onUpdatePreference('currency', newVal);
   };
 
   const toggleDateFormat = () => {
     const formats = ['MM/DD/YY', 'DD/MM/YY', 'YY-MM-DD'];
-    setDateFormat(formats[(formats.indexOf(dateFormat) + 1) % formats.length]);
+    const newVal = formats[(formats.indexOf(dateFormat) + 1) % formats.length];
+    setDateFormat(newVal);
+    onUpdatePreference('dateFormat', newVal);
   };
 
   const toggleLanguage = () => {
@@ -53,20 +68,18 @@ const Settings: React.FC<SettingsProps> = ({
     setLanguage(prev => langs[(langs.indexOf(prev) + 1) % langs.length]);
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
-
-  const handleUpdatePin = () => {
+  const handleUpdatePin = async () => {
     if (newPin.length !== 4) return alert("PIN must be 4 digits");
     try {
       setIsBackingUp(true);
+      await setDoc(doc(db, 'config', 'security'), { accessPin: newPin }, { merge: true });
       localStorage.setItem('rlgs-access-pin', newPin);
-      alert("PIN updated successfully on this device.");
+      alert("PIN updated successfully in Cloud.");
       setIsChangingPin(false);
       setNewPin('');
-    } catch (_) {
-      alert("Failed to update PIN.");
+    } catch (err) {
+      console.error("Error updating PIN:", err);
+      alert("Failed to update PIN in Cloud.");
     } finally {
       setIsBackingUp(false);
     }
@@ -76,22 +89,24 @@ const Settings: React.FC<SettingsProps> = ({
     setIsBackingUp(true);
     setTimeout(() => {
       setIsBackingUp(false);
-      alert('Local Data Secured: All records are stored safely on this device.');
+      alert('Cloud Sync Complete: All preferences and security protocols are synchronized with the central node.');
     }, 1000);
   };
 
   return (
-    <div className="space-y-8 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-8 pb-10">
       <div className="text-center pt-6 mb-4">
-        <div className="relative inline-block mb-4">
-          <div className="w-20 h-20 bg-[#007AFF] rounded-3xl mx-auto flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-[#007AFF]/20 border-2 border-white/10">
-            RL
+        <div 
+          className="relative inline-block mb-6"
+        >
+          <div className="w-24 h-24 bg-gradient-to-tr from-[#007AFF] to-[#5856D6] rounded-[32px] mx-auto flex items-center justify-center text-white text-4xl font-black shadow-2xl shadow-[#007AFF]/20 border-2 border-white/10 italic">
+            RG
           </div>
         </div>
-        <h2 className="text-3xl font-bold text-primary tracking-tight">Admin Portal</h2>
-        <div className="mt-3 flex justify-center">
-           <div className="px-6 py-1.5 border border-main rounded-full bg-glass">
-             <p className="text-tertiary text-[9px] font-bold uppercase tracking-widest">Local Storage Node</p>
+        <h2 className="text-3xl font-black text-primary tracking-tighter">Admin Portal</h2>
+        <div className="mt-4 flex justify-center">
+           <div className="px-6 py-2 border border-main rounded-full bg-glass backdrop-blur-md">
+             <p className="text-tertiary text-[10px] font-bold uppercase tracking-[0.3em]">Cloud Node v3.0</p>
            </div>
         </div>
       </div>
@@ -100,141 +115,124 @@ const Settings: React.FC<SettingsProps> = ({
       <div className="px-1">
         <button 
           onClick={() => toggleSection('preferences')}
-          className="w-full flex items-center justify-between px-4 mb-3 group"
+          className="w-full flex items-center justify-between px-4 mb-4 group"
         >
-          <h3 className="text-[10px] font-bold text-tertiary uppercase tracking-widest">Preferences</h3>
-          <motion.i 
-            animate={{ rotate: expandedSections.preferences ? 0 : -90 }}
-            className="fa-solid fa-chevron-down text-[9px] text-tertiary group-hover:text-secondary transition-colors"
-          ></motion.i>
+          <h3 className="text-[11px] font-bold text-tertiary uppercase tracking-[0.2em]">Preferences</h3>
+          <div className={`transition-transform duration-300 ${expandedSections.preferences ? 'rotate-0' : '-rotate-90'}`}>
+            <ChevronDown className="w-4 h-4 text-tertiary group-hover:text-secondary transition-colors" />
+          </div>
         </button>
         
-        <AnimatePresence initial={false}>
-          {expandedSections.preferences && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="overflow-hidden"
-            >
-              <div className="card-bg rounded-3xl overflow-hidden border border-main shadow-sm">
-                <SettingsItem 
-                  label="Appearance" 
-                  value={theme === 'dark' ? 'Dark' : 'Light'} 
-                  icon={theme === 'dark' ? 'fa-moon' : 'fa-sun'} 
-                  color="text-[#007AFF]"
-                  onClick={toggleTheme}
-                />
-                <SettingsItem 
-                  label="Currency" 
-                  value={currency} 
-                  icon="fa-dollar-sign" 
-                  onClick={toggleCurrency}
-                />
-                <SettingsItem 
-                  label="Date Format" 
-                  value={dateFormat} 
-                  icon="fa-calendar-day" 
-                  onClick={toggleDateFormat}
-                />
-                <SettingsItem 
-                  label="Language" 
-                  value={language} 
-                  icon="fa-globe" 
-                  onClick={toggleLanguage}
-                  isLast
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {expandedSections.preferences && (
+          <div 
+            className="overflow-hidden"
+          >
+            <div className="card-bg rounded-[32px] overflow-hidden border border-main shadow-sm">
+              <SettingsItem 
+                label="Currency" 
+                value={currency} 
+                icon={DollarSign} 
+                onClick={toggleCurrency}
+              />
+              <SettingsItem 
+                label="Date Format" 
+                value={dateFormat} 
+                icon={Calendar} 
+                onClick={toggleDateFormat}
+              />
+              <SettingsItem 
+                label="Language" 
+                value={language} 
+                icon={Globe} 
+                onClick={toggleLanguage}
+                isLast
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Data & Security Section */}
       <div className="px-1">
         <button 
           onClick={() => toggleSection('security')}
-          className="w-full flex items-center justify-between px-4 mb-3 group"
+          className="w-full flex items-center justify-between px-4 mb-4 group"
         >
-          <h3 className="text-[10px] font-bold text-tertiary uppercase tracking-widest">Security</h3>
-          <motion.i 
-            animate={{ rotate: expandedSections.security ? 0 : -90 }}
-            className="fa-solid fa-chevron-down text-[9px] text-tertiary group-hover:text-secondary transition-colors"
-          ></motion.i>
+          <h3 className="text-[11px] font-bold text-tertiary uppercase tracking-[0.2em]">Security</h3>
+          <div className={`transition-transform duration-300 ${expandedSections.security ? 'rotate-0' : '-rotate-90'}`}>
+            <ChevronDown className="w-4 h-4 text-tertiary group-hover:text-secondary transition-colors" />
+          </div>
         </button>
 
-        <AnimatePresence initial={false}>
-          {expandedSections.security && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="overflow-hidden"
-            >
-              <div className="card-bg rounded-3xl overflow-hidden border border-main shadow-sm">
-                {!isChangingPin ? (
-                  <SettingsItem 
-                    label="Access PIN" 
-                    value="Update" 
-                    icon="fa-key" 
-                    color="text-amber-500"
-                    onClick={() => setIsChangingPin(true)}
+        {expandedSections.security && (
+          <div 
+            className="overflow-hidden"
+          >
+            <div className="card-bg rounded-[32px] overflow-hidden border border-main shadow-sm">
+              {!isChangingPin ? (
+                <SettingsItem 
+                  label="Access PIN" 
+                  value="Update" 
+                  icon={Key} 
+                  color="text-amber-500"
+                  onClick={() => setIsChangingPin(true)}
+                />
+              ) : (
+                <div className="p-6 space-y-4 border-b border-main bg-white/[0.01]">
+                  <input 
+                    type="text" 
+                    maxLength={4} 
+                    placeholder="New 4-Digit PIN"
+                    className="w-full bg-glass border border-main rounded-2xl p-4 text-center text-2xl font-black text-primary outline-none focus:border-[#007AFF]/40 tracking-[0.5em]"
+                    value={newPin}
+                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
                   />
-                ) : (
-                  <div className="p-5 space-y-3 border-b border-main bg-glass/20">
-                    <input 
-                      type="text" 
-                      maxLength={4} 
-                      placeholder="New PIN"
-                      className="w-full bg-glass border border-main rounded-xl p-3 text-center text-lg font-bold text-primary outline-none focus:border-[#007AFF]/40"
-                      value={newPin}
-                      onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
-                    />
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={handleUpdatePin}
-                        className="flex-1 py-3 bg-[#007AFF] rounded-xl font-bold text-[10px] uppercase tracking-widest active:scale-95 transition-all text-white"
-                      >
-                        Confirm
-                      </button>
-                      <button 
-                        onClick={() => setIsChangingPin(false)}
-                        className="px-5 py-3 bg-glass rounded-xl font-bold text-[10px] uppercase tracking-widest text-secondary"
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={handleUpdatePin}
+                      className="flex-1 py-4 bg-[#007AFF] rounded-2xl font-bold text-[11px] uppercase tracking-widest text-white shadow-lg shadow-[#007AFF]/20"
+                    >
+                      Confirm
+                    </button>
+                    <button 
+                      onClick={() => setIsChangingPin(false)}
+                      className="px-6 py-4 bg-glass rounded-2xl font-bold text-[11px] uppercase tracking-widest text-secondary border border-main"
+                    >
+                      Cancel
+                    </button>
                   </div>
-                )}
-                <SettingsItem 
-                  label="Local Backup" 
-                  value={isBackingUp ? 'Syncing...' : 'Sync'} 
-                  icon={isBackingUp ? 'fa-spinner fa-spin' : 'fa-shield-check'} 
-                  color="text-blue-500"
-                  onClick={handleBackup}
-                />
-                <SettingsItem 
-                  label="Clear History" 
-                  value="Purge" 
-                  icon="fa-trash-can" 
-                  color="text-rose-500"
-                  onClick={onClearHistory}
-                  isLast
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </div>
+              )}
+              <SettingsItem 
+                label="Cloud Sync" 
+                value={isBackingUp ? 'Syncing...' : 'Sync Now'} 
+                icon={isBackingUp ? Loader2 : CloudUpload} 
+                color="text-blue-500"
+                onClick={handleBackup}
+                isLoading={isBackingUp}
+              />
+              <SettingsItem 
+                label="Clear History" 
+                value="Purge" 
+                icon={Trash2} 
+                color="text-rose-500"
+                onClick={onClearHistory}
+                isLast
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="pt-4 px-1">
         <button 
           onClick={onSignOut}
-          className="w-full py-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl text-rose-500 font-bold text-[10px] uppercase tracking-widest hover:bg-rose-500/10 transition-all"
+          className="w-full py-5 bg-rose-500/5 border border-rose-500/10 rounded-3xl text-rose-500 font-bold text-[11px] uppercase tracking-[0.3em] transition-all hover:bg-rose-500/10"
         >
-          Sign Out
+          <div className="flex items-center justify-center gap-2">
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </div>
         </button>
       </div>
     </div>
@@ -244,26 +242,27 @@ const Settings: React.FC<SettingsProps> = ({
 interface SettingsItemProps {
   label: string;
   value: string;
-  icon: string;
+  icon: any;
   onClick: () => void;
   color?: string;
   isLast?: boolean;
+  isLoading?: boolean;
 }
 
-const SettingsItem: React.FC<SettingsItemProps> = ({ label, value, icon, onClick, color = "text-secondary", isLast = false }) => (
+const SettingsItem: React.FC<SettingsItemProps> = ({ label, value, icon: Icon, onClick, color = "text-secondary", isLast = false, isLoading = false }) => (
   <div 
     onClick={onClick}
-    className={`p-5 flex items-center justify-between active:bg-glass cursor-pointer group ${!isLast ? 'border-b border-main' : ''}`}
+    className={`p-5 flex items-center justify-between cursor-pointer group transition-all hover:bg-white/[0.01] ${!isLast ? 'border-b border-main' : ''}`}
   >
     <div className="flex items-center gap-4">
-      <div className={`w-9 h-9 rounded-xl bg-glass flex items-center justify-center text-xs ${color} transition-transform`}>
-        <i className={`fa-solid ${icon}`}></i>
+      <div className={`w-11 h-11 rounded-2xl bg-glass flex items-center justify-center ${color} transition-transform group-hover:scale-110`}>
+        <Icon className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
       </div>
-      <span className="text-base font-medium text-primary tracking-tight">{label}</span>
+      <span className="text-base font-bold text-primary tracking-tight">{label}</span>
     </div>
-    <div className="flex items-center gap-2.5">
-      <span className="text-xs text-tertiary font-medium">{value}</span>
-      <i className="fa-solid fa-chevron-right text-[8px] text-tertiary opacity-50"></i>
+    <div className="flex items-center gap-3">
+      <span className="text-[11px] text-tertiary font-bold uppercase tracking-wider">{value}</span>
+      <ChevronRight className="w-4 h-4 text-tertiary opacity-30" />
     </div>
   </div>
 );

@@ -6,7 +6,7 @@ export interface DataRecord {
   savings: number; // 0.2 column renamed from tax20
   machine: number;
   restockFunds: number;
-  expenses: number | null;
+  expenses: number;
 }
 
 export type ViewType = 'dashboard' | 'calendar' | 'records' | 'tools' | 'export' | 'settings';

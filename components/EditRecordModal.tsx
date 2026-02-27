@@ -1,5 +1,15 @@
 
 import React, { useState } from 'react';
+import { 
+  X, 
+  ChevronRight, 
+  CheckCircle2, 
+  Calendar, 
+  DollarSign, 
+  Cpu, 
+  Receipt,
+  ArrowLeft
+} from 'lucide-react';
 import { DataRecord } from '../types';
 
 interface EditRecordModalProps {
@@ -26,13 +36,13 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({ record, onClose, onSa
   const savings = parseFloat((storeValue * 0.2).toFixed(2));
   const machineValue = parseFloat(formData.machine) || 0;
   const restockFunds = parseFloat((storeValue * 0.8).toFixed(2));
-  const expenseValue = formData.expenses ? parseFloat(formData.expenses) : null;
+  const expenseValue = parseFloat(formData.expenses) || 0;
 
   // Validation
-  const isNegative = storeValue < 0 || machineValue < 0 || (expenseValue !== null && expenseValue < 0);
+  const isNegative = storeValue < 0 || machineValue < 0 || expenseValue < 0;
   const isStepValid = () => {
     if (step === 1) return formData.store !== '' && storeValue >= 0;
-    if (step === 2) return machineValue >= 0 && (expenseValue === null || expenseValue >= 0);
+    if (step === 2) return machineValue >= 0 && expenseValue >= 0;
     return true;
   };
 
@@ -51,60 +61,68 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({ record, onClose, onSa
 
   return (
     <div 
-      className="fixed inset-0 z-[150] flex items-end justify-center bg-black/80 backdrop-blur-xl animate-in fade-in duration-500 px-0"
+      className="fixed inset-0 z-[150] flex items-end justify-center bg-black/90 backdrop-blur-xl px-0"
       onClick={onClose}
     >
       <div 
-        className="card-bg text-primary w-full rounded-t-[40px] border-t border-main shadow-2xl animate-in slide-in-from-bottom-32 duration-700 flex flex-col max-h-[92vh] overflow-hidden"
+        className="card-bg text-primary w-full rounded-t-[48px] border-t border-main shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-white/10 rounded-full mx-auto mt-4 mb-2"></div>
+        <div className="w-full pt-3 pb-4 flex justify-center">
+          <div className="w-12 h-1.5 bg-white/10 rounded-full"></div>
+        </div>
         
         <div className="px-8 pt-4 pb-2 flex justify-between items-center">
           <div className="flex flex-col">
-            <h3 className="text-2xl font-bold tracking-tight">Revise Entry</h3>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="w-1 h-1 rounded-full bg-amber-500"></span>
-              <p className="text-[9px] font-bold uppercase tracking-widest text-tertiary">Modification Protocol</p>
+            <h3 className="text-3xl font-black tracking-tighter">Revise Entry</h3>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-tertiary">Modification Protocol</p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="w-10 h-10 rounded-xl bg-glass border border-main flex items-center justify-center text-secondary active:scale-90 transition-all"
+            className="w-12 h-12 rounded-2xl bg-glass border border-main flex items-center justify-center text-secondary transition-all"
           >
-            <i className="fa-solid fa-xmark"></i>
+            <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="px-8 flex gap-1 my-6">
+        <div className="px-8 flex gap-2 my-8">
           {[1, 2, 3].map(i => (
-            <div key={i} className="flex-1 h-1 relative overflow-hidden rounded-full bg-glass">
+            <div key={i} className="flex-1 h-1.5 relative overflow-hidden rounded-full bg-glass">
               <div 
-                className={`absolute inset-0 bg-amber-500 transition-transform duration-700 ease-out ${step >= i ? 'translate-x-0' : '-translate-x-full'}`}
-              ></div>
+                className={`absolute inset-0 bg-amber-500 transition-all duration-500 ${step >= i ? 'translate-x-0' : '-translate-x-full'}`}
+              />
             </div>
           ))}
         </div>
 
         <div className="px-8 pb-6 flex-1 overflow-y-auto">
           {step === 1 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div 
+              className="space-y-8"
+            >
               <div className="space-y-3">
-                <label className="text-[10px] font-bold uppercase text-tertiary tracking-widest px-1">Timestamp</label>
+                <label className="flex items-center gap-2 text-[10px] font-black uppercase text-tertiary tracking-[0.2em] px-1">
+                  <Calendar className="w-3 h-3" /> Timestamp
+                </label>
                 <input 
                   type="datetime-local" 
-                  className="w-full bg-glass border border-main rounded-2xl p-5 text-lg font-bold text-primary focus:border-amber-500/40 outline-none transition-all appearance-none"
+                  className="w-full bg-glass border border-main rounded-[24px] p-6 text-lg font-bold text-primary focus:border-amber-500/40 outline-none transition-all appearance-none"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 />
               </div>
               <div className="space-y-3">
-                <label className="text-[10px] font-bold uppercase text-tertiary tracking-widest px-1">Store Amount ({symbol})</label>
+                <label className="flex items-center gap-2 text-[10px] font-black uppercase text-tertiary tracking-[0.2em] px-1">
+                  <DollarSign className="w-3 h-3" /> Store Amount ({symbol})
+                </label>
                 <input 
                   type="number" 
                   inputMode="decimal"
                   placeholder="0.00"
-                  className={`w-full bg-glass border border-main rounded-2xl p-8 text-5xl font-bold focus:border-amber-500/40 outline-none transition-all placeholder:opacity-10 ${storeValue < 0 ? 'text-rose-500 border-rose-500/30' : 'text-primary'}`}
+                  className={`w-full bg-glass border border-main rounded-[32px] p-10 text-6xl font-black focus:border-amber-500/40 outline-none transition-all placeholder:opacity-5 tracking-tighter ${storeValue < 0 ? 'text-rose-500 border-rose-500/30' : 'text-primary'}`}
                   value={formData.store}
                   onChange={(e) => setFormData({ ...formData, store: e.target.value })}
                 />
@@ -113,23 +131,29 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({ record, onClose, onSa
           )}
 
           {step === 2 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div 
+              className="space-y-8"
+            >
               <div className="space-y-3">
-                <label className="text-[10px] font-bold uppercase text-tertiary tracking-widest px-1">Machine Income ({symbol})</label>
+                <label className="flex items-center gap-2 text-[10px] font-black uppercase text-tertiary tracking-[0.2em] px-1">
+                  <Cpu className="w-3 h-3" /> Machine Income ({symbol})
+                </label>
                 <input 
                   type="number" 
                   placeholder="0.00"
-                  className={`w-full bg-glass border border-main rounded-2xl p-5 text-xl font-bold focus:border-amber-500/40 outline-none transition-all ${machineValue < 0 ? 'text-rose-500 border-rose-500/30' : 'text-primary'}`}
+                  className={`w-full bg-glass border border-main rounded-[24px] p-6 text-xl font-bold focus:border-amber-500/40 outline-none transition-all ${machineValue < 0 ? 'text-rose-500 border-rose-500/30' : 'text-primary'}`}
                   value={formData.machine}
                   onChange={(e) => setFormData({ ...formData, machine: e.target.value })}
                 />
               </div>
               <div className="space-y-3">
-                <label className="text-[10px] font-bold uppercase text-tertiary tracking-widest px-1">Expenses ({symbol})</label>
+                <label className="flex items-center gap-2 text-[10px] font-black uppercase text-tertiary tracking-[0.2em] px-1">
+                  <Receipt className="w-3 h-3" /> Expenses ({symbol})
+                </label>
                 <input 
                   type="number" 
                   placeholder="0.00"
-                  className={`w-full bg-glass border border-main rounded-2xl p-5 text-xl font-bold focus:border-amber-500/40 outline-none transition-all ${(expenseValue !== null && expenseValue < 0) ? 'text-rose-500 border-rose-500/30' : 'text-primary'}`}
+                  className={`w-full bg-glass border border-main rounded-[24px] p-6 text-xl font-bold focus:border-amber-500/40 outline-none transition-all ${(expenseValue !== null && expenseValue < 0) ? 'text-rose-500 border-rose-500/30' : 'text-primary'}`}
                   value={formData.expenses}
                   onChange={(e) => setFormData({ ...formData, expenses: e.target.value })}
                 />
@@ -138,21 +162,23 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({ record, onClose, onSa
           )}
 
           {step === 3 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-glass/30 border border-main p-8 rounded-3xl space-y-6">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500">Revision Summary</p>
-                <div className="space-y-4">
+            <div 
+              className="space-y-6"
+            >
+              <div className="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-main p-8 rounded-[40px] space-y-8">
+                <p className="text-[11px] font-black uppercase tracking-[0.3em] text-amber-500">Revision Summary</p>
+                <div className="space-y-6">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">New Revenue</span>
-                    <span className="text-xl font-bold text-primary tabular-nums">{symbol}{storeValue.toLocaleString()}</span>
+                    <span className="text-[11px] font-bold text-tertiary uppercase tracking-[0.1em]">New Revenue</span>
+                    <span className="text-2xl font-black text-primary tabular-nums tracking-tight">{symbol}{storeValue.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">Savings (20%)</span>
-                    <span className="text-xl font-bold text-emerald-500 tabular-nums">{symbol}{savings.toLocaleString()}</span>
+                    <span className="text-[11px] font-bold text-tertiary uppercase tracking-[0.1em]">Savings (20%)</span>
+                    <span className="text-2xl font-black text-emerald-500 tabular-nums tracking-tight">{symbol}{savings.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">Restock Money</span>
-                    <span className="text-xl font-bold text-primary tabular-nums">{symbol}{restockFunds.toLocaleString()}</span>
+                    <span className="text-[11px] font-bold text-tertiary uppercase tracking-[0.1em]">Restock Money</span>
+                    <span className="text-2xl font-black text-primary tabular-nums tracking-tight">{symbol}{restockFunds.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -165,24 +191,24 @@ const EditRecordModal: React.FC<EditRecordModalProps> = ({ record, onClose, onSa
             <button 
               onClick={() => isStepValid() && setStep(step + 1)}
               disabled={!isStepValid()}
-              className={`w-full py-6 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${isStepValid() ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20 active:scale-95' : 'bg-glass text-tertiary cursor-not-allowed'}`}
+              className={`w-full py-6 rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 ${isStepValid() ? 'bg-amber-500 text-white shadow-xl shadow-amber-500/20' : 'bg-glass text-tertiary cursor-not-allowed'}`}
             >
-              Continue <i className="fa-solid fa-chevron-right text-[10px]"></i>
+              Continue <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <button 
                 onClick={handleFinish}
                 disabled={isNegative}
-                className={`w-full py-6 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${!isNegative ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20 active:scale-95' : 'bg-glass text-tertiary cursor-not-allowed'}`}
+                className={`w-full py-6 rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 ${!isNegative ? 'bg-amber-500 text-white shadow-xl shadow-amber-500/20' : 'bg-glass text-tertiary cursor-not-allowed'}`}
               >
-                Commit Changes <i className="fa-solid fa-check-double text-[10px]"></i>
+                Commit Changes <CheckCircle2 className="w-4 h-4" />
               </button>
               <button 
                 onClick={() => setStep(1)}
-                className="w-full py-3 text-tertiary text-[10px] font-bold uppercase tracking-widest active:opacity-50 transition-all"
+                className="w-full py-2 text-tertiary text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-2"
               >
-                Go Back
+                <ArrowLeft className="w-3 h-3" /> Go Back
               </button>
             </div>
           )}
